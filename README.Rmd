@@ -1,0 +1,232 @@
+---
+title: "Immunotherapy Resistance cell-cell Interaction Scanner (updated)"
+output: html_document
+date: "2024-06-14"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## README
+
+Code to use Immunotherapy Resistance cell-cell Interactions Scanner (IRIS).
+
+This repository provides the code to reproduce the results of IRIS associated with our manuscript.
+
+1.  System requirements:
+
+    IRIS was tested using R version 4.2.1 (2023-10-22), using libraries tidyverse v2.0.0, magrittr v2.0.3, dplyr v1.1.3, pROC v1.18.4, rBayesianOptimization v1.2.0, parallely v1.36.0.
+
+2.  Demo
+
+    To run IRIS to reproduce the resistance deactivated interaction results of the manuscript:
+
+    `source('/IRIS/1. IRIS/code/IRIS_Final.R')`
+
+    Expected output can be found:
+
+    `/IRIS/1. IRIS/results/IRIS_RDI_output.Rdata`
+
+## Folders/Files:
+
+## 0. Input
+
+### bulk ICB:
+
+1.  **`IRIS_LIRICS_final_ICB_cohort_input_OS.Rdata`**
+
+    File containing ligand-receptor activity profile and accompanying patient overall survival meta information for each ICB Melanoma patient tumor sample, organized by the ICB cohort and treatment timepoint (pre or on). List index 1 contains samples treated with combination or mono therapy together in each cohort. List index 2 contains samples treated with combination or mono therapy separately for each cohort.
+
+2.  **`IRIS_LIRICS_final_ICB_cohort_input_PFS.Rdata`**
+
+    File containing ligand-receptor activity profile and accompanying patient progression free survival meta information for each ICB Melanoma patient tumor sample, organized by the ICB cohort and treatment timepoint (pre or on). List index 1 contains samples treated with combination or mono therapy together in each cohort. List index 2 contains samples treated with combination or mono therapy separately for each cohort.
+
+3.  **`IRIS_LIRICS_final_ICB_cohort_input_response.Rdata`**
+
+    File containing ligand-receptor activity profile and accompanying patient ICB response (RECIST) meta information for each ICB Melanoma patient tumor sample, organized by the ICB cohort and treatment timepoint (pre or on). List index 1 contains samples treated with combination or mono therapy together in each cohort. List index 2 contains samples treated with combination or mono therapy separately for each cohort. List index 1 contains samples treated with combination or mono therapy together in each cohort. List index 2 contains samples treated with combination or mono therapy separately for each cohort. [This data is the direct input of IRIS.]{.underline}
+
+### LIRICS:
+
+1.  `ligand_receptor_final.xlsx`
+
+    File corresponding to input ligand-receptor list used for LIRICS. File sourced from:
+
+    Wang K, Patkar S, Lee JS, et al. Deconvolving Clinically Relevant Cellular Immune Cross-talk from Bulk Gene Expression Using CODEFACS and LIRICS Stratifies Patients with Melanoma to Anti-PD-1 Therapy. *Cancer Discov*. 2022;12(4):1088-1105. <doi:10.1158/2159-8290.CD-21-0887>
+
+2.  `lirics_database_interactions.RDS`
+
+    File containing all possible Melanoma TME relevant cell-type-specific ligand-receptor interactions inferred. File used as background for enrichment analysis.
+
+### sc Livnat ICB:
+
+1.  `livnat2018_TPM_pseudopat_scmap_seed20892_rslurm_400nodes_40.rds`
+
+    File containing cell-type-specific ligand-receptor activity profile inferred from Jerby-Arnon et al. Cell 2018 single-cell data ([GSE115978](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE115978))
+
+### TCGA:
+
+1.  `TCGA_LIRICS.Rdata`
+
+    File containing ligand-receptor activity profile and accompanying meta information for each TCGA Melanoma (SKCM) patient tumor sample.
+
+2.  `TCGA_LIRICS_SURV.Rdata`
+
+    File containing ligand-receptor activity profile and accompanying patient survival (OS and PFS) meta information for each TCGA Melanoma (SKCM) patient tumor sample.
+
+## 1. IRIS
+
+### code:
+
+1.  `IRIS_Final.R`
+
+    Code to run Immunotherapy Resistance cell-cell Interaction Scanner (IRIS). As input, IRIS takes **`IRIS_LIRICS_final_ICB_cohort_input_response.Rdata`** . You can specify your multiple testing cohorts prior to simplify downstream analysis. Scroll to "START HERE" to modify input etc.
+
+### results:
+
+1.  `IRIS_RAI_output_mc.Rdata`
+
+    Expected Resistance Activated Interactions (RAI) output for IRIS when performing Leave One Out Cohort independent validation using **`IRIS_LIRICS_final_ICB_cohort_input_response.Rdata`** as input for training and testing. Output organized and ordered to match monotherapy/combination therapy grouping.
+
+2.  `IRIS_RDI_output_mc.Rdata`
+
+    Expected Resistance Deactivated Interactions (RDI) output for IRIS when performing Leave One Out Cohort independent validation using **`IRIS_LIRICS_final_ICB_cohort_input_response.Rdata`** as input for training and testing. Output organized and ordered to match monotherapy/combination therapy grouping.
+
+3.  `IRIS_RDI_output.Rdata`
+
+    Expected Resistance Deactivated Interactions (RDI) output for IRIS when performing Leave One Out Cohort independent validation using **`IRIS_LIRICS_final_ICB_cohort_input_response.Rdata`** as input for training and testing.
+
+4.  `IRIS_RAI_output.Rdata`
+
+    Expected Resistance Activated Interactions (RAI) output for IRIS when performing Leave One Out Cohort independent validation using **`IRIS_LIRICS_final_ICB_cohort_input_response.Rdata`** as input for training and testing.
+
+## 2. Benchmark
+
+### code:
+
+1.  `signature_validation_bulk.R`
+
+    Code to benchmark existing state-of-the-art transcriptomics based methods.
+
+### LIVNAT:
+
+1.  `TCGA_SKCM.rds`
+
+    Jerby-Arnon et al. Cell 2018 ImmRes results for TCGA SKCM. File sourced from: <https://portals.broadinstitute.org/single_cell/study/melanoma-immunotherapy-resistance>
+
+### Signatures:
+
+1.  `impres_auc_supp.rds`
+
+    AUC results using IMPRES on melanoma ICB cohorts (monotherapy and combination therapy separately).
+
+2.  `sig_auc.rds`
+
+    AUC results using *PD1*, *CTLA4*, *PDL1*, Tex, MPS, INFG, Cytotoxic, Tin, resF, and IMPRES biomarkers on melanoma ICB cohorts.
+
+3.  `sig_input.rds`
+
+    "raw" score results using *PD1*, *CTLA4*, *PDL1*, Tex, MPS, INFG, Cytotoxic, Tin, resF, and IMPRES biomarkers on melanoma ICB cohorts.
+
+### TIDE:
+
+1.  `tide_auc_supp.rds`
+
+    AUC results using TIDE on melanoma ICB cohorts (monotherapy and combination therapy separately).
+
+2.  `tide_auc.rds`
+
+    AUC results using TIDE on melanoma ICB cohorts.
+
+3.  `sig_input.rds`
+
+    "raw" score results using TIDE on melanoma ICB cohorts.
+
+## 3. Figure
+
+### Code:
+
+Code to reproduce manuscript figures and results
+
+1.  `input.R`
+
+    centralized file to input path of input files/results
+
+2.  `calculate_score.R`
+
+    centralized file of generalized functions used across different results.
+
+## 4. SOCIAL
+
+### code:
+
+1.  `livnat18_SOCIAL (clean gpp2).R`
+
+    Code to run SOCIAL (step 1-3) on Jerby-Arnon's Cell 2018 scRNA-seq data. Inputs are detailed within the script. Must be ran on an HPC cluster. \*Step 4 is ran in the figure file.
+
+2.  `gpp2.RDS`
+
+    Internal function containing code to execute step 2 and 3 of SOCIAL.
+
+## 5. SPECIAL
+
+### analysis/results:
+
+1.  `spatialanalysis_izar2022_final.R`
+
+    Code to analyze results from SPECIAL (including performing step 4) and reproduce figures for Biermann et al. 2022 spatial transcriptomics data.
+
+2.  `spatialanalysis_thrane2018_final.R`
+
+    Code to analyze results from SPECIAL (including performing step 4) and reproduce figures for Biermann et al. 2022 spatial transcriptomics data.
+
+### code:
+
+1.  `gpp3.RDS`
+
+    Internal function containing code to execute step 2 and 3 of SOCIAL.
+
+2.  `spatialcci_function.R`
+
+    Internal function containing code to execute step 1 of SOCIAL
+
+3.  `SPECIAL_rslurmv4_izar.R`
+
+    Code to run SPECIAL step through 2 for Biermann et al. 2022 spatial transcriptomics data (SlideSeqV2). As input, SPECIAL takes **`izar2018v2_030224_all_LR.RDS`**. Code must be run on HPC.
+
+4.  `SPECIAL_rslurmv4_thrane.R`
+
+    Code to run SPECIAL step through 2 for Thrane et al. 2018 spatial transcriptomics data (Legacy ST). As input, SPECIAL takes **`thrane2018v2_030224_all_LR.RDS`**. Code must be run on HPC.
+
+### input:
+
+#### code for RCTD pipeline:
+
+1.  `spacexr_izar2023.R`
+
+    Code to pre-process Biermann et al. 2022 SlideSeqV2 data for compatability to CytoSPACE single-cell mode.
+
+#### organized input for SPECIAL:
+
+1.  `izar2018v2_030224_all_LR.RDS`
+
+    File containing the required input to run SPECIAL for Biermann et al.'s cohort. Outer list corresponds to each spatial transcriptomic slide profiled. Inner list index 1 contains slide name. Inner list index 2 contains a matrix of all plausabile cell-cell interaction gene pairs within the **matched patient** single-nuclei transcriptomics data corresponding to that slide. Inner list index 3 is a data.frame (direct output of CytoSPACE) corresponding to the location of individual single-cell within the spatial transcriptomic slide. Inner list index 4 is a matrix corresponding to the **matched patient** aligned single-nuclei transcriptomics data.
+
+2.  `thrane2018_012724_all_LR.RDS`
+
+    File containing the required input to run SPECIAL for Thrane et al.'s cohort. Outer list corresponds to each spatial transcriptomic slide profiled. Inner list index 1 contains slide name. Inner list index 2 contains a matrix of all plausabile cell-cell interaction gene pairs within the unmatched single-cell transcriptomics data corresponding to that slide (Jerby-Arnon et al. 2018 Naive cells). Inner list index 3 is a data.frame (direct output of CytoSPACE) corresponding to the location of individual single-cell within the spatial transcriptomic slide. Inner list index 4 is a matrix corresponding to the aligned single-cell transcriptomics data (Jerby-Arnon et al. 2018 Naive cells).
+
+#### raw output from CytoSPACE:
+
+    Output files from CytoSPACE corresponding to aligned single-cell transcriptomes to spatial transcriptomes.
+
+
+### output:
+
+1.  `spatialcci_izar2022v2_output_030324_size_250_all_cci_null_0.RDS`
+
+    File containing the output of SPECIAL steps 1 through 2 for Biermann et al.'s cohort. Outer list corresponds to each spatial transcriptomic slide profiled. Inner list index 1 contains slide name. Inner list index 2 contains a matrix of empirical p-values for each cell-cell interaction (cci) at each region, an output of SOCIAL step 2 and 3. Inner list index 3 contains a vector of regions removed from SPECIAL analysis. Inner list index 4 contains a matrix of mean ligand expression for each cci, an output of SOCIAL step 2 and 3. Inner list index 5 contains a matrix of mean receptor expression for each cci, an output of SOCIAL step 2 and 3.
+
+2.  `spatialcci_thrane2018_output_021824_radius_1_all_cci_null_1.RDS`
+
+    File containing the output of SPECIAL steps 1 through 2 for Thrane et al.'s cohort. Outer list corresponds to each spatial transcriptomic slide profiled. Inner list index 1 contains slide name. Inner list index 2 contains a matrix of empirical p-values for each cell-cell interaction (cci) at each region, an output of SOCIAL step 2 and 3. Inner list index 3 contains a vector of regions removed from SPECIAL analysis. Inner list index 4 contains a matrix of mean ligand expression for each cci, an output of SOCIAL step 2 and 3. Inner list index 5 contains a matrix of mean receptor expression for each cci, an output of SOCIAL step 2 and 3. Null windows should be ignored.
